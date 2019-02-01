@@ -36,3 +36,9 @@ Velocity commands are sent when `A button` is pressed and `left joystick` is use
 Velocity commands are sent when `1 button` is pressed and main `joystick` is used simultaneously.
 
 Maximum velocity is increased/decreased through the `throttle button`.
+
+
+###### Based on:
+> The Standard ROS JavaScript Library - http://wiki.ros.org/roslibjs
+>
+> roslibpy: ROS Bridge library - https://roslibpy.readthedocs.io/en/latest/
