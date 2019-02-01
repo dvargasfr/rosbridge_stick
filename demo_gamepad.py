@@ -8,6 +8,6 @@ while True:
     events = inputs.get_gamepad()
     for event in events:
         print(event.ev_type, event.code, event.state)
-        #if (event.ev_code == 'BTN_SOUTH')
+        #if event.code == 'BTN_TRIGGER':
         #    print(event.ev_type, event.code, event.state)
-        #if (event.ev_type == BTN_WEST)
+        #ABS_THROTTLE BTN_TRIGGER ABS_X ABS_Y
