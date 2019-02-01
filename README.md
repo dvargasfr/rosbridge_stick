@@ -19,10 +19,11 @@ Press any button if the output shows that joystick/gamepad is not being detected
 
 ## Python steps
 
-`inputs` library needed.
+`roslibpy` and `inputs` libraries needed.
 ```
-sudo pip install inputs
+sudo pip install roslibpy inputs 
 ```
+
 Run the `.py` file.
 
 Press any button if the output shows that joystick/gamepad is not being detected.
