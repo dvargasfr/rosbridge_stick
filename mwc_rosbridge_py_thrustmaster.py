@@ -50,13 +50,13 @@ try:
                 print('Throttle ',ABS_THROTTLE)
                 talker.publish(roslibpy.Message({
                     'linear': {
-                        'x':ABS_Y,
+                        'x':ABS_Y*ABS_THROTTLE,
                         'y':0.0,
                         'z':0.0},
                     'angular':{
                         'x':ABS_THROTTLE,
                         'y':0.0,
-                        'z':ABS_X
+                        'z':ABS_X*ABS_THROTTLE
                     }}))
 except KeyboardInterrupt:
     pass
