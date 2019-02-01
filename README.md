@@ -30,13 +30,15 @@ Press any button if the output shows that joystick/gamepad is not being detected
 
 ## Logitech Gamepad use
 
-Velocity commands are sent when `A button` is pressed and `left joystick` is used simultaneously.
+Velocity commands are sent when `A` button is pressed and `left joystick` is used simultaneously.
 
 ## Thrustmaster Joystick use
 
-Velocity commands are sent when `1 button` is pressed and main `joystick` is used simultaneously.
+> **NOTE:** `PRESET` button light must be red.
 
-Maximum velocity is increased/decreased through the `throttle button`.
+Velocity commands are sent when `1` button is pressed and main `joystick` is used simultaneously.
+
+Maximum velocity is increased/decreased through the `THROTTLE` button.
 
 
 ###### Based on:
