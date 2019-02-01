@@ -11,13 +11,13 @@
 <script type="text/javascript" src="./scripts/jquery.min.js"></script>
 <script type="text/javascript" type="text/javascript">
 
-  var vel_factor = 0;
+  var vel_factor = 1;
   var ros = new ROSLIB.Ros({
     //url : 'ws://192.168.12.20:9090'
-    //url : 'ws://localhost:9090'
+    url : 'ws://localhost:9090'
     //url : 'ws://10.0.0.2:9090'
     //url : 'ws://10.140.73.242:9090'
-    url : 'ws://192.168.2.213:9090'
+    //url : 'ws://192.168.2.213:9090'
   });
 
   ros.on('connection', function() {
