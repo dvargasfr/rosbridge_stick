@@ -7,9 +7,20 @@
 <script type="text/javascript" src="./scripts/eventemitter2.min.js"></script>
 <!--script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script-->
 <script type="text/javascript" src="./scripts/roslib.min.js"></script>
-
+<!--script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script-->
 <script type="text/javascript" src="./scripts/jquery.min.js"></script>
 <script type="text/javascript" type="text/javascript">
+
+/*
+  Axis XY         -1.5  to    1.5
+  Axis Throttle   0.0   to    1.0
+  Button 1        send command
+  Button 2        close hook
+  Button 4        open hook
+  Button 9        up hook
+  Button 10       down hook
+  None            send 0s
+*/
 
   var OSName="Unknown OS";
   if (navigator.appVersion.indexOf("Win")!=-1) OSName="Windows";
@@ -18,7 +29,16 @@
   if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
   console.log(OSName);
 
-  var vel_factor = 1;
+  /*Coeficient to set X and Y axis values between -1.5 and 1.5*/
+  var COEF_XY = 1.5;
+
+  /* Acceleration to control velocities */
+  var THROTTLE = 1.0;
+
+  /* Transform 1 | 0 | -1 to 0 | 0.5 | 1 */
+  var COEF_THROTTLE = -0.5;
+  var OFFSET_THROTTLE = 0.5;
+
   var ros = new ROSLIB.Ros({
     //url : 'ws://192.168.12.20:9090'
     url : 'ws://localhost:9090'
@@ -78,20 +98,23 @@
       */
 
       if (OSName == 'Linux'){
-        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
-        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-1)*THROTTLE);
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-1)*THROTTLE);
         var linear_acc = parseFloat(gp.axes[3].toFixed(2));
       }
+
       if (OSName == 'Windows'){
-        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
-        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-1)*THROTTLE);
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-1)*THROTTLE);
         var linear_acc = parseFloat(gp.axes[6].toFixed(2));
       }
 
-      html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
-      html+= "Stick 2 (Throttle): "+linear_acc+"<br/>";
+      THROTTLE = (linear_acc*COEF_THROTTLE)+OFFSET_THROTTLE;
 
-      //vel_factor = aux_linear_vel;
+      html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
+      html+= "Stick 2 (Throttle): "+THROTTLE+"<br/>";
+
+      /* Button 1: send commands if pressed, else send 0s*/
       if(gp.buttons[0].pressed){
         var twist_msg = new ROSLIB.Message({
           linear : {
@@ -105,9 +128,23 @@
             z : angular_vel
           }
         });
-        cmdVel.publish(twist_msg);
+      }else{
+        var twist_msg = new ROSLIB.Message({
+          linear : {
+            x : 0.0,
+            y : 0.0,
+            z : 0.0
+          },
+          angular : {
+            x : 0.0,
+            y : 0.0,
+            z : 0.0
+          }
+        });
       }
+      cmdVel.publish(twist_msg);
 
+      /* Button 10: Down the hook */
       if(gp.buttons[9].pressed){
         console.log("Pulsado boton 10");
         var request = new ROSLIB.ServiceRequest({
@@ -118,6 +155,8 @@
           console.log(result);
         });
       }
+
+      /* Button 9: Up the hook */
       if(gp.buttons[8].pressed){
         console.log("Pulsado boton 9");
         var request = new ROSLIB.ServiceRequest({
@@ -128,6 +167,8 @@
           console.log(result);
         });
       }
+
+      /* Button 4: Open the hook */
       if(gp.buttons[3].pressed){
         console.log("Pulsado boton 4");
         var request = new ROSLIB.ServiceRequest({
@@ -138,6 +179,8 @@
           console.log(result);
         });
       }
+
+      /* Button 2: Close the hook */
       if(gp.buttons[1].pressed){
         console.log("Pulsado boton 2");
         var request = new ROSLIB.ServiceRequest({
