@@ -13,8 +13,8 @@
 
   var vel_factor = 1;
   var ros = new ROSLIB.Ros({
-    //url : 'ws://192.168.12.20:9090'
-    url : 'ws://localhost:9090'
+    url : 'ws://192.168.12.20:9090'
+    //url : 'ws://localhost:9090'
     //url : 'ws://10.0.0.2:9090'
     //url : 'ws://10.140.73.242:9090'
     //url : 'ws://192.168.2.213:9090'
@@ -36,6 +36,12 @@
     ros : ros,
     name : '/cmd_vel',
     messageType : 'geometry_msgs/Twist'
+  });
+
+  var hookService = new ROSLIB.Service({
+    ros : ros,
+    name : '/hook/controller/command',
+    serviceType : 'mir_hook_controller/Command'
   });
 
   var hasGP = false;
@@ -83,6 +89,47 @@
           }
         });
         cmdVel.publish(twist_msg);
+      }
+
+      if(gp.buttons[9].pressed){
+        console.log("Pulsado boton 10");
+        var request = new ROSLIB.ServiceRequest({
+          cmd:"height",
+          value:370
+        });
+        hookService.callService(request, function(result) {
+          console.log(result);
+        });
+      }
+      if(gp.buttons[8].pressed){
+        console.log("Pulsado boton 9");
+        var request = new ROSLIB.ServiceRequest({
+          cmd:"height",
+          value:390
+        });
+        hookService.callService(request, function(result) {
+          console.log(result);
+        });
+      }
+      if(gp.buttons[3].pressed){
+        console.log("Pulsado boton 4");
+        var request = new ROSLIB.ServiceRequest({
+          cmd:"open",
+          value:0
+        });
+        hookService.callService(request, function(result) {
+          console.log(result);
+        });
+      }
+      if(gp.buttons[1].pressed){
+        console.log("Pulsado boton 2");
+        var request = new ROSLIB.ServiceRequest({
+          cmd:"close",
+          value:0
+        });
+        hookService.callService(request, function(result) {
+          console.log(result);
+        });
       }
 
       $("#gamepadDisplay").html(html);
