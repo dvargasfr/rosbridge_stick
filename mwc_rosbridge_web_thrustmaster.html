@@ -11,6 +11,13 @@
 <script type="text/javascript" src="./scripts/jquery.min.js"></script>
 <script type="text/javascript" type="text/javascript">
 
+  var OSName="Unknown OS";
+  if (navigator.appVersion.indexOf("Win")!=-1) OSName="Windows";
+  if (navigator.appVersion.indexOf("Mac")!=-1) OSName="MacOS";
+  if (navigator.appVersion.indexOf("X11")!=-1) OSName="UNIX";
+  if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+  console.log(OSName);
+
   var vel_factor = 1;
   var ros = new ROSLIB.Ros({
     //url : 'ws://192.168.12.20:9090'
@@ -70,9 +77,17 @@
       }
       */
 
-      var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
-      var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
-      var linear_acc = parseFloat(gp.axes[6].toFixed(2));
+      if (OSName == 'Linux'){
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
+        var linear_acc = parseFloat(gp.axes[3].toFixed(2));
+      }
+      if (OSName == 'Windows'){
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
+        var linear_acc = parseFloat(gp.axes[6].toFixed(2));
+      }
+
       html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
       html+= "Stick 2 (Throttle): "+linear_acc+"<br/>";
 
