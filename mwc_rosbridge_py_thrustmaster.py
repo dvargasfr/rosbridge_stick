@@ -4,10 +4,13 @@ from __future__ import print_function
 from threading import Thread
 import roslibpy
 import inputs
+from inputs import devices
+from inputs import get_gamepad
 import time
 
 print(inputs.devices.gamepads)
-
+for device in devices:
+        print(device)
 BTN_TRIGGER = 0
 ABS_X = 0
 ABS_Y = 0
