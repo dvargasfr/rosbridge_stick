@@ -39,9 +39,12 @@
   var COEF_THROTTLE = -0.5;
   var OFFSET_THROTTLE = 0.5;
 
+  /* Detect forward/backward direction to correct turns */
+  var GO_FORWARD = 1.0;
+
   var ros = new ROSLIB.Ros({
-    //url : 'ws://192.168.12.20:9090'
-    url : 'ws://localhost:9090'
+    url : 'ws://192.168.12.20:9090'
+    //url : 'ws://localhost:9090'
     //url : 'ws://10.0.0.2:9090'
     //url : 'ws://10.140.73.242:9090'
     //url : 'ws://192.168.2.213:9090'
@@ -98,18 +101,24 @@
       */
 
       if (OSName == 'Linux'){
-        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-1)*THROTTLE);
-        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-1)*THROTTLE);
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-GO_FORWARD)*THROTTLE);
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-GO_FORWARD)*THROTTLE);
         var linear_acc = parseFloat(gp.axes[3].toFixed(2));
       }
 
       if (OSName == 'Windows'){
-        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-1)*THROTTLE);
-        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-1)*THROTTLE);
+        var angular_vel = parseFloat(gp.axes[0].toFixed(2)*COEF_XY*(-GO_FORWARD)*THROTTLE);
+        var linear_vel = parseFloat(gp.axes[1].toFixed(2)*COEF_XY*(-GO_FORWARD)*THROTTLE);
         var linear_acc = parseFloat(gp.axes[6].toFixed(2));
       }
 
       THROTTLE = (linear_acc*COEF_THROTTLE)+OFFSET_THROTTLE;
+      
+      if (linear_vel < -0.05) {
+        GO_FORWARD = -1.0;
+      } else {
+        GO_FORWARD = 1.0;
+      }
 
       html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
       html+= "Stick 2 (Throttle): "+THROTTLE+"<br/>";
