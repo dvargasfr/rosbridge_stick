@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-
+<link type="text/css" rel="stylesheet" href="css/mwc_thrustmaster.css"/>
 <!--script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script-->
 <script type="text/javascript" src="./scripts/eventemitter2.min.js"></script>
 <!--script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script-->
@@ -27,6 +27,9 @@
   if (navigator.appVersion.indexOf("Mac")!=-1) OSName="MacOS";
   if (navigator.appVersion.indexOf("X11")!=-1) OSName="UNIX";
   if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+  console.log(navigator);
+  console.log(navigator.appVersion);
+  console.log(navigator.platform);
   console.log(OSName);
 
   /*Coeficient to set X and Y axis values between -1.5 and 1.5*/
@@ -43,8 +46,8 @@
   var GO_FORWARD = 1.0;
 
   var ros = new ROSLIB.Ros({
-    url : 'ws://192.168.12.20:9090'
-    //url : 'ws://localhost:9090'
+    //url : 'ws://192.168.12.20:9090'
+    url : 'ws://localhost:9090'
     //url : 'ws://10.0.0.2:9090'
     //url : 'ws://10.140.73.242:9090'
     //url : 'ws://192.168.2.213:9090'
@@ -113,7 +116,8 @@
       }
 
       THROTTLE = (linear_acc*COEF_THROTTLE)+OFFSET_THROTTLE;
-      
+      $("#btnthrottle").html(THROTTLE);
+
       if (linear_vel < -0.05) {
         GO_FORWARD = -1.0;
       } else {
@@ -137,6 +141,7 @@
             z : angular_vel
           }
         });
+        $("#btn1").html("X: "+linear_vel+", Y: "+angular_vel);
       }else{
         var twist_msg = new ROSLIB.Message({
           linear : {
@@ -150,6 +155,7 @@
             z : 0.0
           }
         });
+        $("#btn1").html("X: 0.0, Y: 0.0");
       }
       cmdVel.publish(twist_msg);
 
@@ -164,6 +170,7 @@
           console.log(result);
         });
       }
+      $("#btn10").html("370");
 
       /* Button 9: Up the hook */
       if(gp.buttons[8].pressed){
@@ -176,6 +183,7 @@
           console.log(result);
         });
       }
+      $("#btn9").html("390");
 
       /* Button 4: Open the hook */
       if(gp.buttons[3].pressed){
@@ -188,6 +196,7 @@
           console.log(result);
         });
       }
+      $("#btn4").html("open");
 
       /* Button 2: Close the hook */
       if(gp.buttons[1].pressed){
@@ -200,8 +209,7 @@
           console.log(result);
         });
       }
-
-      $("#gamepadDisplay").html(html);
+      $("#btn2").html("close");
   }
 
   $(document).ready(function() {
@@ -233,9 +241,28 @@
 </script>
 </head>
 <body>
-  <h1>Simple roslib Example</h1>
-  <p>Check your Web Console for output.</p>
-  <div id="gamepadPrompt"></div>
+  <!--h1>Simple roslib Example</h1>
+  <p>Check your Web Console for output.</p-->
+  <h1 id="gamepadPrompt"></h1>
   <div id="gamepadDisplay"></div>
+  <div id="left-column">
+    <div class="item">Button 1: Send Command</div>
+    <div id="btn1">aaa</div>
+    <div class="item">Button 2: Close Hook</div>
+    <div id="btn2">aaa</div>
+    <div class="item">Button 4: Open Hook</div>
+    <div id="btn4">aaa</div>
+  </div>
+  <div id="right-column">
+    <div class="item">Button 9: Up Hook</div>
+    <div id="btn9">aaa</div>
+    <div class="item">Button 10: Down Hook</div>
+    <div id="btn10">aaa</div>
+    <div class="item">Throttle: Set Acceleration</div>
+    <div id="btnthrottle">aaa</div>
+  </div>
+  <img class="img-acciona" src="images/logo-acciona.jpg"/>
+  <img class="img-5g" src="images/5G-orange.png"/>
+  <img class="img-orange" src="images/logo-orange.png"/>
 </body>
 </html>
