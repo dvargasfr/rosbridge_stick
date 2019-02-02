@@ -63,7 +63,6 @@
       var rs_linear_vel = parseFloat(gp.axes[3].toFixed(2)*vel_factor*(-1));
       html+= "Stick 1: "+ls_linear_vel+"  "+ls_angular_vel+"<br/>";
       html+= "Stick 2: "+rs_linear_vel+"  "+rs_angular_vel+"<br/>";
-      vel_factor = aux_linear_vel;
       if(gp.buttons[0].pressed){
         var twist_msg = new ROSLIB.Message({
           linear : {

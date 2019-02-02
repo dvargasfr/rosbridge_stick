@@ -64,28 +64,30 @@
           html+= "<br/>";
       }
 
-      var ls_angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
-      var ls_linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
-      var rs_angular_vel = parseFloat(gp.axes[4].toFixed(2));
-      var rs_linear_vel = parseFloat(gp.axes[5].toFixed(2)*vel_factor*(-1));
-      var aux_angular_vel = parseFloat(gp.axes[2].toFixed(2));
-      var aux_linear_vel = parseFloat(gp.axes[3].toFixed(2));
-      html+= "Stick 1: "+ls_linear_vel+"  "+ls_angular_vel+"<br/>";
-      html+= "Stick 2 (Vel_Factor): "+aux_linear_vel+"<br/>";
-      html+= "Stick 3: "+rs_linear_vel+"  "+rs_angular_vel+"<br/>";
+      /*
+      for(var i=0;i<gp.axes.length;i++) {
+          html+= "MyStick "+(i+1)+": "+gp.axes[i]+ "<br/>";
+      }
+      */
 
-      vel_factor = aux_linear_vel;
+      var angular_vel = parseFloat(gp.axes[0].toFixed(2)*vel_factor*(-1));
+      var linear_vel = parseFloat(gp.axes[1].toFixed(2)*vel_factor*(-1));
+      var linear_acc = parseFloat(gp.axes[6].toFixed(2));
+      html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
+      html+= "Stick 2 (Throttle): "+linear_acc+"<br/>";
+
+      //vel_factor = aux_linear_vel;
       if(gp.buttons[0].pressed){
         var twist_msg = new ROSLIB.Message({
           linear : {
-            x : ls_linear_vel,
+            x : linear_vel,
             y : 0.0,
             z : 0.0
           },
           angular : {
             x : 0.0,
             y : 0.0,
-            z : ls_angular_vel
+            z : angular_vel
           }
         });
         cmdVel.publish(twist_msg);

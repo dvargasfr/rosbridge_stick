@@ -34,7 +34,8 @@ Velocity commands are sent when `A` button is pressed and `left joystick` is use
 
 ## Thrustmaster Joystick use
 
-> **NOTE:** `PRESET` button light must be red.
+> **NOTE 1:** On Windows PC, driver installation is needed https://support.thrustmaster.com/es/product/tflightstickx-es/
+> **NOTE 2:** `PRESET` button light must be red and `PC/PS3` switch on `PC` mode.
 
 Velocity commands are sent when `1` button is pressed and main `joystick` is used simultaneously.
 
