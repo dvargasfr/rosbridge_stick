@@ -61,7 +61,7 @@ def get_gamepad_events():
                 else:
                     GO_FORWARD = 1;
             if event.code == 'ABS_THROTTLE':
-                ABS_THROTTLE = (( CEF_THROTTLE - event.state) / COEF_THROTTLE) + OFFSET_THROTTLE;
+                ABS_THROTTLE = (( COEF_THROTTLE - event.state) / COEF_THROTTLE) + OFFSET_THROTTLE;
 
 
 try:

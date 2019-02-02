@@ -43,6 +43,10 @@ Maximum velocity is increased/decreased through the `THROTTLE` button.
 
 
 ###### Based on:
-> The Standard ROS JavaScript Library - http://wiki.ros.org/roslibjs
+> **JavaScript rosbridge** The Standard ROS JavaScript Library - http://wiki.ros.org/roslibjs
 >
-> roslibpy: ROS Bridge library - https://roslibpy.readthedocs.io/en/latest/
+> **JavaScript inputs** HTML5 Gamepad API - https://w3c.github.io/gamepad/
+>
+> **Python rosbridge** roslibpy: ROS Bridge library - https://roslibpy.readthedocs.io/en/latest/
+>
+> **Python inputs** Python inputs - https://pypi.org/project/inputs/
