@@ -8,22 +8,22 @@ html, body
 .img-acciona{
   position: absolute;
   bottom: 3%;
-  height: 30%;
+  width: 30%;
   left: 3%;
 }
 
 .img-orange{
   position: absolute;
-  bottom: 10%;
-  height: 20%;
+  bottom: 5%;
+  width: 10%;
   left: 80%;
 }
 
 .img-5g{
   position: absolute;
   bottom: 3%;
-  height: 35%;
-  left: 30%;
+  width: 35%;
+  left: 35%;
 }
 
 #left-column{
