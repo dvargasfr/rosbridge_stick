@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="refresh" content="300">
 <link type="text/css" rel="stylesheet" href="css/mwc_thrustmaster.css"/>
 <!--script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script-->
 <script type="text/javascript" src="./scripts/eventemitter2.min.js"></script>
@@ -46,12 +47,13 @@
   var GO_FORWARD = 1.0;
 
   var ros = new ROSLIB.Ros({
-    //url : 'ws://192.168.12.20:9090'
-    url : 'ws://192.168.2.213:9090'
+    url : 'ws://192.168.12.20:9090' //En local en el robot
+    //url : 'ws://192.168.2.213:9090'
     //url : 'ws://localhost:9090'
     //url : 'ws://10.0.0.2:9090'
     //url : 'ws://10.140.73.242:9090'
-    //url : 'ws://192.168.2.213:9090'
+    //url : 'ws://192.168.2.213:9090' // Con router
+    //url : 'ws://192.168.42.195:9090' // Con CPE
   });
 
   ros.on('connection', function() {
@@ -118,13 +120,13 @@
 
       THROTTLE = (linear_acc*COEF_THROTTLE)+OFFSET_THROTTLE;
       $("#btnthrottle").html(THROTTLE);
-
+/*
       if (linear_vel < -0.05) {
         GO_FORWARD = -1.0;
       } else {
         GO_FORWARD = 1.0;
       }
-
+*/
       html+= "Stick 1: "+linear_vel+"  "+angular_vel+"<br/>";
       html+= "Stick 2 (Throttle): "+THROTTLE+"<br/>";
 
