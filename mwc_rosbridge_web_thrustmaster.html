@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="refresh" content="300">
+<meta http-equiv="refresh" content="100">
 <link type="text/css" rel="stylesheet" href="css/mwc_thrustmaster.css"/>
 <!--script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script-->
 <script type="text/javascript" src="./scripts/eventemitter2.min.js"></script>
@@ -213,7 +213,38 @@
         });
       }
       $("#btn2").html("close");
-  }
+
+      /* Button 5: Send mission (POST)*/
+      if(gp.buttons[4].pressed){
+      //$("#aux_btn").click(function() {
+          console.log("Pulsado boton 5");
+          $.ajax({
+            type: "POST",
+            url: "192.168.12.20/api/v2.0.0/mission_queue",
+            headers:{
+              "accept-language":"en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6",
+              "authorization":"Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=="
+            },
+            data: '{"mission_id":"7f2738ff-2aaf-11e9-bbc9-94c69116b9d7"}',
+            //success: success,
+            dataType: 'json',
+            contentType: 'application/json'
+          })
+          .done(function(data, textStatus, jqXHR) {
+            if (console && console.log) {
+              console.log( "La solicitud se ha completado correctamente.");
+            }
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            if (console && console.log) {
+              console.log("La solicitud ha fallado: " +  textStatus);
+              console.log("jqXHR: " +  jqXHR);
+              console.log("errorThrown: " +  errorThrown);
+            }
+          });
+        //});
+        }
+      }
 
   $(document).ready(function() {
       if(canGame()) {
@@ -231,6 +262,7 @@
               window.clearInterval(repGP);
           });
           //setup an interval for Chrome
+          /*
           var checkGP = window.setInterval(function() {
               console.log('checkGP');
               if(navigator.getGamepads()[0]) {
@@ -238,6 +270,7 @@
                   window.clearInterval(checkGP);
               }
           }, 500);
+          */
       }
   });
 
@@ -264,6 +297,11 @@
     <div class="item">Throttle: Set Acceleration</div>
     <div id="btnthrottle">aaa</div>
   </div>
+
+  <div id="aux_btn">
+    Click here
+  </div>
+
   <img class="img-acciona" src="images/logo-acciona.jpg"/>
   <img class="img-5g" src="images/5G-orange.png"/>
   <img class="img-orange" src="images/logo-orange.png"/>

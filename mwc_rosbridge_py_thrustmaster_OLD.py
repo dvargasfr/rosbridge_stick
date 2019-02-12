@@ -1,14 +1,16 @@
 #!/usr/bin/python
 
 from __future__ import print_function
+from threading import Thread
 import roslibpy
+import inputs
+from inputs import devices
+from inputs import get_gamepad
 import time
-import sdl2
-import sdl2.ext
-sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO)
-sdl2.SDL_Init(sdl2.SDL_INIT_JOYSTICK)
-joystick = sdl2.SDL_JoystickOpen(0)
 
+print(inputs.devices.gamepads)
+for device in devices:
+        print(device)
 BTN_TRIGGER = 0
 ABS_X = 0
 ABS_Y = 0
@@ -33,13 +35,7 @@ freq_cnt = 0
 ros = roslibpy.Ros(host='localhost', port=9090)
 ros.run()
 ros.on_ready(lambda: print('Is ROS connected?', ros.is_connected))
-print("Connecting...")
-#while(not ros.is_connected):
-#    continue
-print("Connected!")
-
 talker = roslibpy.Topic(ros, '/cmd_vel', 'geometry_msgs/Twist')
-hookService = roslibpy.Service(ros, '/hook/controller/command', 'mir_hook_controller/Command')
 
 def get_gamepad_events():
     global BTN_TRIGGER
@@ -69,40 +65,10 @@ def get_gamepad_events():
 
 
 try:
+    thread = Thread(target = get_gamepad_events, args = ())
+    thread.start()
     while True:
-        for event in sdl2.ext.get_events():
-            if event.type==sdl2.SDL_JOYAXISMOTION:
-                print ('Axis: ',[event.jaxis.axis,event.jaxis.value])
-                # Eje X
-                if event.jaxis.axis==0:
-                    ABS_X = event.jaxis.value
-                # Eje Y
-                if event.jaxis.axis==1:
-                    ABS_Y = event.jaxis.value
-                # Eje Throttle
-                if event.jaxis.axis==3:
-                    ABS_THROTTLE = event.jaxis.value
-            if event.type==sdl2.SDL_JOYBUTTONDOWN:
-                print ('Button press: ',[event.jaxis.axis,event.jaxis.value])
-                # Boton 1: send commands if pressed, else send 0s
-                if event.jaxis.axis==0:
-                    print ('detectado boton 1')
-                    BTN_TRIGGER = 1
-                # Boton 2: Close the hook
-                if event.jaxis.axis==1:
-                    print ('detectado boton 2')
-                    request = roslibpy.SserviceRequest()
-                    hookService.call(request, succes_callback, error_callback)
-                # Boton 4: Open the hook
-                if event.jaxis.axis==3:
-                    print ('detectado boton 4')
-            if event.type==sdl2.SDL_JOYBUTTONUP:
-                print ('Button up: ',[event.jaxis.axis,event.jaxis.value])
-                if event.jaxis.axis==0:
-                    print ('detectado boton 1')
-                    BTN_TRIGGER = 0
-
-
+        time.sleep(0.1)
         if BTN_TRIGGER == 1:
             print('Trigger ', BTN_TRIGGER)
             print('X ', ABS_X)
@@ -133,7 +99,6 @@ try:
                     'y':0.0,
                     'z':0.0
                 }}))
-        
 except KeyboardInterrupt:
     thread.stop()
     cleanup_stop_thread()
