@@ -7,6 +7,7 @@ import inputs
 from inputs import devices
 from inputs import get_gamepad
 import time
+import requests
 
 
 #  Axis XY         -1.5  to    1.5
@@ -14,6 +15,7 @@ import time
 #  Button 1        send command
 #  Button 2        close hook
 #  Button 4        open hook
+#  Button 5        launch mission
 #  Button 9        up hook
 #  Button 10       down hook
 #  None            send 0s
@@ -26,6 +28,7 @@ print(inputs.devices.gamepads)
 BTN_TRIGGER = 0     # Button 1
 BTN_THUMB = 0       # Button 2
 BTN_TOP = 0         # Button 4
+BTN_TOP2 = 0        # Button 5
 BTN_BASE3 = 0       # Button 9
 BTN_BASE4 = 0       # Button 10
 ABS_X = 0           # Joystick X axis
@@ -48,12 +51,19 @@ COEF_THROTTLE = 255.0
 freq_cnt = 0
 
 #ros = roslibpy.Ros(host='192.168.12.20', port=9090)
-ros = roslibpy.Ros(host='198.17.0.52', port=9090)
+ros = roslibpy.Ros(host='localhost', port=9090)
 ros.run()
 ros.on_ready(lambda: print('Is ROS connected?', ros.is_connected))
 talker = roslibpy.Topic(ros, '/cmd_vel', 'geometry_msgs/Twist')
 hookService = roslibpy.Service(ros, '/hook/controller/command', 'mir_hook_controller/Command')
-testService = roslibpy.Service(ros, '/rosout/get_loggers', 'roscpp/GetLoggers')
+
+#service = roslibpy.Service(ros, '/rosapi/topics', 'rosapi/Topics')
+
+def success_callback(result):
+    print('Service response: ', result)
+
+def error_callback(*args):
+    print('Something went wrong')
 
 def get_gamepad_events():
     global BTN_TRIGGER, BTN_THUMB, BTN_TOP, BTN_BASE3, BTN_BASE4
@@ -97,7 +107,6 @@ def get_gamepad_events():
                 else:
                     BTN_BASE4 = 0
 
-
 try:
     thread = Thread(target = get_gamepad_events, args = ())
     thread.daemon = True
@@ -105,10 +114,10 @@ try:
     while True:
         time.sleep(0.1)
         if BTN_TRIGGER == 1:
-            #print('Trigger ', BTN_TRIGGER)
-            #print('X ', ABS_X)
-            #print('Y ', ABS_Y)
-            #print('Throttle ',ABS_THROTTLE)
+            print('Trigger ', BTN_TRIGGER)
+            print('X ', ABS_X*ABS_THROTTLE)
+            print('Y ', ABS_Y*ABS_THROTTLE)
+            print('Throttle ', ABS_THROTTLE)
             talker.publish(roslibpy.Message({
                 'linear': {
                     'x':ABS_Y*ABS_THROTTLE,
@@ -136,15 +145,31 @@ try:
                 }}))
         if BTN_THUMB == 1:
             print("Btn 2: cierra gancho")
-            request = roslibpy.ServiceRequest()
-            testService.call(request, lambda: print('service succes'), lambda: print('service error'))
-            #hookService.call(request, lambda: print('service succes'), lambda: print('service error'))
+            request = roslibpy.ServiceRequest({'cmd':"close",'value':0})
+            hookService.call(request, success_callback, error_callback)
+            #request = roslibpy.ServiceRequest()
+            #service.call(request, success_callback, error_callback)
         if BTN_TOP == 1:
             print("Btn 4: abre gancho")
+            request = roslibpy.ServiceRequest({'cmd':"open",'value':0})
+            hookService.call(request, None, None)
         if BTN_BASE3 == 1:
             print("Btn 9: sube gancho")
+            request = roslibpy.ServiceRequest({'cmd':"height",'value':390})
+            hookService.call(request, None, None)
         if BTN_BASE4 == 1:
             print("Btn 10: baja gancho")
+            request = roslibpy.ServiceRequest({'cmd':"height",'value':370})
+            hookService.call(request, None, None)
+        if BTN_TOP2 == 1:
+            print("Lanzada mision!")
+            url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
+            headers = {
+              'accept-language":"en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6',
+              'authorization":"Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='
+            }
+            payload = '{"mission_id":"7f2738ff-2aaf-11e9-bbc9-94c69116b9d7"}'
+            r = requests.post(url, headers=headers, json=payload)
 except KeyboardInterrupt:
     pass
 
