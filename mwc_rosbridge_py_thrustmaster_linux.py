@@ -8,6 +8,7 @@ from inputs import devices
 from inputs import get_gamepad
 import time
 import requests
+import json
 
 
 #  Axis XY         -1.5  to    1.5
@@ -50,8 +51,8 @@ COEF_THROTTLE = 255.0
 
 freq_cnt = 0
 
-#ros = roslibpy.Ros(host='192.168.12.20', port=9090)
-ros = roslibpy.Ros(host='localhost', port=9090)
+ros = roslibpy.Ros(host='192.168.12.20', port=9090)
+#ros = roslibpy.Ros(host='localhost', port=9090)
 ros.run()
 ros.on_ready(lambda: print('Is ROS connected?', ros.is_connected))
 talker = roslibpy.Topic(ros, '/cmd_vel', 'geometry_msgs/Twist')
@@ -66,14 +67,14 @@ def error_callback(*args):
     print('Something went wrong')
 
 def get_gamepad_events():
-    global BTN_TRIGGER, BTN_THUMB, BTN_TOP, BTN_BASE3, BTN_BASE4
+    global BTN_TRIGGER, BTN_THUMB, BTN_TOP, BTN_TOP2, BTN_BASE3, BTN_BASE4
     global ABS_X, ABS_Y, OFFSET_XY, COEF_XY
     global ABS_THROTTLE, COEF_THROTTLE, OFFSET_THROTTLE
     global GO_FORWARD
     while True:
         events = inputs.get_gamepad()
         for event in events:
-            #print(event.ev_type, event.code, event.state)
+            print(event.ev_type, event.code, event.state)
             if event.code == 'BTN_TRIGGER':
                 BTN_TRIGGER = event.state;
             if event.code == 'ABS_X':
@@ -106,6 +107,11 @@ def get_gamepad_events():
                     BTN_BASE4 = 1
                 else:
                     BTN_BASE4 = 0
+            if event.code == 'BTN_TOP2':
+                if event.state == 1:
+                    BTN_TOP2 = 1
+                else:
+                    BTN_TOP2 = 0
 
 try:
     thread = Thread(target = get_gamepad_events, args = ())
@@ -155,20 +161,17 @@ try:
             hookService.call(request, None, None)
         if BTN_BASE3 == 1:
             print("Btn 9: sube gancho")
-            request = roslibpy.ServiceRequest({'cmd':"height",'value':390})
+            request = roslibpy.ServiceRequest({'cmd':"height",'value':220})
             hookService.call(request, None, None)
         if BTN_BASE4 == 1:
             print("Btn 10: baja gancho")
-            request = roslibpy.ServiceRequest({'cmd':"height",'value':370})
+            request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
             hookService.call(request, None, None)
         if BTN_TOP2 == 1:
             print("Lanzada mision!")
             url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
-            headers = {
-              'accept-language":"en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6',
-              'authorization":"Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='
-            }
-            payload = '{"mission_id":"7f2738ff-2aaf-11e9-bbc9-94c69116b9d7"}'
+            headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
+            payload = {'mission_id':'7f2738ff-2aaf-11e9-bbc9-94c69116b9d7'}
             r = requests.post(url, headers=headers, json=payload)
 except KeyboardInterrupt:
     pass
