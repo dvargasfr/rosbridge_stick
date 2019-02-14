@@ -14,11 +14,11 @@ import json
 #  Axis XY         -1.5  to    1.5
 #  Axis Throttle   0.0   to    1.0
 #  Button 1        send command
-#  Button 2        close hook
-#  Button 4        open hook
+#  Button 2        down and open hook
+#  Button 4        up and close hook
 #  Button 5        launch mission
-#  Button 9        up hook
-#  Button 10       down hook
+#  Button 9        -
+#  Button 10       -
 #  None            send 0s
 
 
@@ -150,23 +150,30 @@ try:
                     'z':0.0
                 }}))
         if BTN_THUMB == 1:
-            print("Btn 2: cierra gancho")
-            request = roslibpy.ServiceRequest({'cmd':"close",'value':0})
-            hookService.call(request, success_callback, error_callback)
+            print("Btn 2: baja brazo y abre gancho")
+            request_close = roslibpy.ServiceRequest({'cmd':"open",'value':0})
+            hookService.call(request_close, success_callback, error_callback)
+            time.sleep(0.5)
+            request_down = roslibpy.ServiceRequest({'cmd':"height",'value':190})
+            hookService.call(request_down, None, None)
             #request = roslibpy.ServiceRequest()
             #service.call(request, success_callback, error_callback)
         if BTN_TOP == 1:
-            print("Btn 4: abre gancho")
-            request = roslibpy.ServiceRequest({'cmd':"open",'value':0})
-            hookService.call(request, None, None)
+            print("Btn 4: sube brazo y cierra gancho")
+            request_open = roslibpy.ServiceRequest({'cmd':"close",'value':0})
+            hookService.call(request_open, None, None)
+            request_up = roslibpy.ServiceRequest({'cmd':"height",'value':220})
+            hookService.call(request_up, None, None)
         if BTN_BASE3 == 1:
-            print("Btn 9: sube gancho")
-            request = roslibpy.ServiceRequest({'cmd':"height",'value':220})
-            hookService.call(request, None, None)
+            #print("Btn 9: sube gancho")
+            #request = roslibpy.ServiceRequest({'cmd':"height",'value':220})
+            #hookService.call(request, None, None)
+            pass
         if BTN_BASE4 == 1:
-            print("Btn 10: baja gancho")
-            request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
-            hookService.call(request, None, None)
+            #print("Btn 10: baja gancho")
+            #request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
+            #hookService.call(request, None, None)
+            pass
         if BTN_TOP2 == 1:
             print("Lanzada mision!")
             url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
