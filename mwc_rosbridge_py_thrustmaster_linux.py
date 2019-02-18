@@ -169,16 +169,22 @@ try:
             #request = roslibpy.ServiceRequest({'cmd':"height",'value':220})
             #hookService.call(request, None, None)
             pass
-        if BTN_BASE4 == 1:
+        #if BTN_BASE4 == 1:
             #print("Btn 10: baja gancho")
             #request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
             #hookService.call(request, None, None)
-            pass
+            #pass
         if BTN_TOP2 == 1:
             print("Lanzada mision!")
             url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
             headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
             payload = {'mission_id':'7f2738ff-2aaf-11e9-bbc9-94c69116b9d7'}
+            r = requests.post(url, headers=headers, json=payload)
+        # Activa el modo mission
+        if BTN_BASE4 == 1:
+            url = 'http://192.168.12.20/api/v2.0.0/mode'
+            headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
+            payload = {'mode_string':'mission'}
             r = requests.post(url, headers=headers, json=payload)
 except KeyboardInterrupt:
     pass
