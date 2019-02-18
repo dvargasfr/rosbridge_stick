@@ -57,6 +57,7 @@ ros.run()
 ros.on_ready(lambda: print('Is ROS connected?', ros.is_connected))
 talker = roslibpy.Topic(ros, '/cmd_vel', 'geometry_msgs/Twist')
 hookService = roslibpy.Service(ros, '/hook/controller/command', 'mir_hook_controller/Command')
+hookBrakeService = roslibpy.Service(ros, '/hook/brake/command', 'mir_hook_controller/Command')
 
 #service = roslibpy.Service(ros, '/rosapi/topics', 'rosapi/Topics')
 
@@ -174,19 +175,24 @@ try:
             #request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
             #hookService.call(request, None, None)
             #pass
+        # Envia una mision
         if BTN_TOP2 == 1:
+            url = 'http://192.168.12.20/?mode=set-robot-state&state=3'
+            headers = {'Accept': '*/*', 'X-Requested-With': 'XMLHttpRequest', 'Accept-Encoding': 'gzip, deflate', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8', 'Cookie': 'mir_login_type=regular; mir_user_id=2; mir_user_shortcode=7280306096; PHPSESSID=jd07v8gf2lf2cujbasp1rtpsr0; menu_desktop_visible=true; mir_lang=en_US'}
+            r = requests.get(url=url, headers=headers)
             print("Lanzada mision!")
             url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
             headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
             payload = {'mission_id':'7f2738ff-2aaf-11e9-bbc9-94c69116b9d7'}
             r = requests.post(url, headers=headers, json=payload)
-        # Activa el modo mission
+            time.sleep(0.5)
+            url = 'http://192.168.12.20/?mode=set-robot-state&state=4'
+            headers = {'Accept': '*/*', 'X-Requested-With': 'XMLHttpRequest', 'Accept-Encoding': 'gzip, deflate', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8', 'Cookie': 'mir_login_type=regular; mir_user_id=2; mir_user_shortcode=7280306096; PHPSESSID=jd07v8gf2lf2cujbasp1rtpsr0; menu_desktop_visible=true; mir_lang=en_US'}
+            r = requests.get(url=url, headers=headers)
+        # Activa el freno del hook
         if BTN_BASE4 == 1:
-            url = 'http://192.168.12.20/api/v2.0.0/mode'
-            headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
-            payload = {'mode_string':'mission'}
-            r = requests.post(url, headers=headers, json=payload)
-except KeyboardInterrupt:
+            request_hook_brake = roslibpy.ServiceRequest({'cmd':"ON",'value':0})
+            hookBrakeService.call(request_hook_brake, None, None)except KeyboardInterrupt:
     pass
 
 ros.terminate()
