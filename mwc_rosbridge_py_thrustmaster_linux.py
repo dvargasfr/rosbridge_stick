@@ -10,31 +10,17 @@ import time
 import requests
 import json
 
-
-#  Axis XY         -1.5  to    1.5
-#  Axis Throttle   0.0   to    1.0
-#  Button 1        send command
-#  Button 2        down and open hook
-#  Button 4        up and close hook
-#  Button 5        launch mission
-#  Button 9        -
-#  Button 10       -
-#  None            send 0s
-
-
 print(inputs.devices.gamepads)
 #for device in devices:
 #    print(device)
 
-BTN_TRIGGER = 0     # Button 1
-BTN_THUMB = 0       # Button 2
-BTN_TOP = 0         # Button 4
-BTN_TOP2 = 0        # Button 5
-BTN_BASE3 = 0       # Button 9
-BTN_BASE4 = 0       # Button 10
-ABS_X = 0           # Joystick X axis
-ABS_Y = 0           # Joystick Y axis
-ABS_THROTTLE = 1    # Throttle axis
+BTN_TRIGGER = 0     # Button 1          -   send command
+BTN_THUMB = 0       # Button 2          -   down and open hook
+BTN_TOP = 0         # Button 4          -   up and close hook
+BTN_TOP2 = 0        # Button 5          -   launch mission
+ABS_X = 0           # Joystick X axis   -   X velocity (-1.5 to 1.5)
+ABS_Y = 0           # Joystick Y axis   -   Y velocity (-1.5 to 1.5)
+ABS_THROTTLE = 1    # Throttle axis     -   Velocity factor (0.0 to 1.0)
 GO_FORWARD = 1
 
 # Offset for XY axis values boundaries (-1 to 1)
@@ -51,15 +37,16 @@ COEF_THROTTLE = 255.0
 
 freq_cnt = 0
 
-ros = roslibpy.Ros(host='192.168.12.20', port=9090)
+ROS_IP='10.0.0.192'
+REST_IP='10.0.0.192'
+
+ros = roslibpy.Ros(host=ROS_IP, port=9090)
 #ros = roslibpy.Ros(host='localhost', port=9090)
 ros.run()
 ros.on_ready(lambda: print('Is ROS connected?', ros.is_connected))
 talker = roslibpy.Topic(ros, '/cmd_vel', 'geometry_msgs/Twist')
 hookService = roslibpy.Service(ros, '/hook/controller/command', 'mir_hook_controller/Command')
 hookBrakeService = roslibpy.Service(ros, '/hook/brake/command', 'mir_hook_controller/Command')
-
-#service = roslibpy.Service(ros, '/rosapi/topics', 'rosapi/Topics')
 
 def success_callback(result):
     print('Service response: ', result)
@@ -121,6 +108,10 @@ try:
     while True:
         time.sleep(0.1)
         if BTN_TRIGGER == 1:
+            # Delete every mission on queue before sending move commands
+            url = 'http://'+REST_IP+'/api/v2.0.0/mission_queue'
+            headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
+            r = requests.delete(url=url, headers=headers)
             print('Trigger ', BTN_TRIGGER)
             print('X ', ABS_X*ABS_THROTTLE)
             print('Y ', ABS_Y*ABS_THROTTLE)
@@ -136,10 +127,6 @@ try:
                     'z':ABS_X*ABS_THROTTLE
                 }}))
         else:
-            #print('Trigger ', BTN_TRIGGER)
-            #print('X 0.0')
-            #print('Y 0.0')
-            #print('Throttle ',ABS_THROTTLE)
             talker.publish(roslibpy.Message({
                 'linear': {
                     'x':0.0,
@@ -150,49 +137,41 @@ try:
                     'y':0.0,
                     'z':0.0
                 }}))
+        # Baja brazo, abre gancho y activa freno
         if BTN_THUMB == 1:
-            print("Btn 2: baja brazo y abre gancho")
+            print("Btn 2: baja brazo, abre gancho y activa freno")
             request_close = roslibpy.ServiceRequest({'cmd':"open",'value':0})
             hookService.call(request_close, success_callback, error_callback)
             time.sleep(0.5)
             request_down = roslibpy.ServiceRequest({'cmd':"height",'value':190})
             hookService.call(request_down, None, None)
-            #request = roslibpy.ServiceRequest()
-            #service.call(request, success_callback, error_callback)
+            request_hook_brake = roslibpy.ServiceRequest({'cmd':"ON",'value':0})
+            hookBrakeService.call(request_hook_brake, None, None)
+        # Sube brazo, cierra gancho y desactiva freno
         if BTN_TOP == 1:
-            print("Btn 4: sube brazo y cierra gancho")
+            print("Btn 4: sube brazo, cierra gancho y desactiva freno")
             request_open = roslibpy.ServiceRequest({'cmd':"close",'value':0})
             hookService.call(request_open, None, None)
-            request_up = roslibpy.ServiceRequest({'cmd':"height",'value':220})
+            request_up = roslibpy.ServiceRequest({'cmd':"height",'value':230})
             hookService.call(request_up, None, None)
-        if BTN_BASE3 == 1:
-            #print("Btn 9: sube gancho")
-            #request = roslibpy.ServiceRequest({'cmd':"height",'value':220})
-            #hookService.call(request, None, None)
-            pass
-        #if BTN_BASE4 == 1:
-            #print("Btn 10: baja gancho")
-            #request = roslibpy.ServiceRequest({'cmd':"height",'value':190})
-            #hookService.call(request, None, None)
-            #pass
-        # Envia una mision
+            request_hook_brake = roslibpy.ServiceRequest({'cmd':"OFF",'value':0})
+            hookBrakeService.call(request_hook_brake, None, None)
+        # Lanza mision
         if BTN_TOP2 == 1:
-            url = 'http://192.168.12.20/?mode=set-robot-state&state=3'
+            url = 'http://'+REST_IP+'/?mode=set-robot-state&state=3'
             headers = {'Accept': '*/*', 'X-Requested-With': 'XMLHttpRequest', 'Accept-Encoding': 'gzip, deflate', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8', 'Cookie': 'mir_login_type=regular; mir_user_id=2; mir_user_shortcode=7280306096; PHPSESSID=jd07v8gf2lf2cujbasp1rtpsr0; menu_desktop_visible=true; mir_lang=en_US'}
             r = requests.get(url=url, headers=headers)
             print("Lanzada mision!")
-            url = 'http://192.168.12.20/api/v2.0.0/mission_queue'
+            url = 'http://'+REST_IP+'/api/v2.0.0/mission_queue'
             headers = {'accept-language':'en-GB,en;q=0.9,es-ES;q=0.8,es;q=0.7,en-US;q=0.6','authorization':'Basic YWRtaW46NzI3NjQ5MDg5ZTZjYmMxMDVlNGRkOTkwZGIxMDg4OTg1ZmJiOTQ0Y2Y3NWQyYzQ4ODUxMGQ1MzliMDA3NzkwZg=='}
-            payload = {'mission_id':'7f2738ff-2aaf-11e9-bbc9-94c69116b9d7'}
+            payload = {'mission_id':'59ef27c1-352a-11e9-b790-94c69116b9d7'}
             r = requests.post(url, headers=headers, json=payload)
             time.sleep(0.5)
-            url = 'http://192.168.12.20/?mode=set-robot-state&state=4'
+            url = 'http://'+REST_IP+'/?mode=set-robot-state&state=4'
             headers = {'Accept': '*/*', 'X-Requested-With': 'XMLHttpRequest', 'Accept-Encoding': 'gzip, deflate', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8', 'Cookie': 'mir_login_type=regular; mir_user_id=2; mir_user_shortcode=7280306096; PHPSESSID=jd07v8gf2lf2cujbasp1rtpsr0; menu_desktop_visible=true; mir_lang=en_US'}
             r = requests.get(url=url, headers=headers)
-        # Activa el freno del hook
-        if BTN_BASE4 == 1:
-            request_hook_brake = roslibpy.ServiceRequest({'cmd':"ON",'value':0})
-            hookBrakeService.call(request_hook_brake, None, None)except KeyboardInterrupt:
+
+except KeyboardInterrupt:
     pass
 
 ros.terminate()
